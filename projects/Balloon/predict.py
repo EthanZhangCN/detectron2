@@ -28,12 +28,22 @@ cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7   # set a custom testing threshold
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (ballon). (see https://detectron2.readthedocs.io/tutorials/datasets.html#update-the-config-for-new-datasets)
 
 predictor = DefaultPredictor(cfg)
+print(im.shape)
 
 outputs = predictor(im)
+print("outputs contains all the information")
+print(outputs['instances'].to("cpu").get_fields().keys())
+print(outputs['instances'].to("cpu").get_fields()['pred_boxes'])
+print(outputs['instances'].to("cpu").get_fields()['scores'])
+print(outputs['instances'].to("cpu").get_fields()['pred_classes'])
+print(outputs['instances'].to("cpu").get_fields()['pred_masks'].shape)
+
+# the folowings are for the visualization.
 
 from detectron2.utils.visualizer import ColorMode
 
 balloon_metadata = MetadataCatalog.get("balloon_train")
+balloon_metadata.set(thing_classes=["found_balloon"]) 
 
 v = Visualizer(im[:, :, ::-1],
                metadata=balloon_metadata, 

@@ -67,7 +67,13 @@ def get_balloon_dicts(img_dir):
 
 for d in ["train", "val"]:
     DatasetCatalog.register("balloon_" + d, lambda d=d: get_balloon_dicts(datasets_path + d))
-    MetadataCatalog.get("balloon_" + d).set(thing_classes=["balloon"])
+    # MetadataCatalog.get("balloon_" + d).set(thing_classes=["ssssss"])
+
+
+dic =get_balloon_dicts(datasets_path + 'train')
+
+print(dic[0])
+
 balloon_metadata = MetadataCatalog.get("balloon_train")
 
 
@@ -83,6 +89,7 @@ balloon_metadata = MetadataCatalog.get("balloon_train")
 # cv2.waitKey()
 # cv2.destroyAllWindows()
 
+# exit()
 
 # Train
 
@@ -101,13 +108,6 @@ cfg.SOLVER.MAX_ITER = 500    # 300 iterations seems good enough for this toy dat
 cfg.SOLVER.STEPS = []        # do not decay learning rate
 cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128   # faster, and good enough for this toy dataset (default: 512)
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (ballon). (see https://detectron2.readthedocs.io/tutorials/datasets.html#update-the-config-for-new-datasets)
-
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-# import torch
-# print(torch.cuda.is_available())
-
-# torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 # NOTE: this config means the number of classes, but a few popular unofficial tutorials incorrect uses num_classes+1 here.
 
