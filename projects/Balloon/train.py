@@ -72,24 +72,25 @@ for d in ["train", "val"]:
 
 dic =get_balloon_dicts(datasets_path + 'train')
 
-print(dic[0])
+print(dic)
+exit()
 
 balloon_metadata = MetadataCatalog.get("balloon_train")
 
 
-# ## show img
-# dataset_dicts = get_balloon_dicts(datasets_path+"/train/")
-# for d in random.sample(dataset_dicts, 3):
-#     img = cv2.imread(d["file_name"])
-#     visualizer = Visualizer(img[:, :, ::-1], metadata=balloon_metadata, scale=0.5)
-#     out = visualizer.draw_dataset_dict(d)
-#     cv2.imshow("trian im",out.get_image()[:, :, ::-1])
-#     cv2.waitKey(0)
+## show img
+dataset_dicts = get_balloon_dicts(datasets_path+"/train/")
+for d in random.sample(dataset_dicts, 3):
+    img = cv2.imread(d["file_name"])
+    visualizer = Visualizer(img[:, :, ::-1], metadata=balloon_metadata, scale=0.5)
+    out = visualizer.draw_dataset_dict(d)
+    cv2.imshow("trian im",out.get_image()[:, :, ::-1])
+    cv2.waitKey(0)
 
-# cv2.waitKey()
-# cv2.destroyAllWindows()
+cv2.waitKey()
+cv2.destroyAllWindows()
 
-# exit()
+exit()
 
 # Train
 
