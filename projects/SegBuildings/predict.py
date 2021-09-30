@@ -23,7 +23,7 @@ for root,dirs,files in os.walk(datasets_path):
 
 for img in files:
 
-    if img.split('.')[1]!='jpg':
+    if img.split('.')[1]=='json':
         continue
 
     im = cv2.imread(os.path.join(datasets_path,img))
@@ -33,21 +33,21 @@ for img in files:
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
     cfg.MODEL.WEIGHTS = os.path.join("./output/", "model_final.pth")  # path to the model we just trained
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.2   # set a custom testing threshold
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7   # set a custom testing threshold
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (ballon). (see https://detectron2.readthedocs.io/tutorials/datasets.html#update-the-config-for-new-datasets)
 
     predictor = DefaultPredictor(cfg)
-    # print(im.shape)
+    print(im.shape)
 
 
 
     outputs = predictor(im)
-    # print("outputs contains all the information")
-    # print(outputs['instances'].to("cpu").get_fields().keys())
-    # print(outputs['instances'].to("cpu").get_fields()['pred_boxes'])
-    # print(outputs['instances'].to("cpu").get_fields()['scores'])
-    # print(outputs['instances'].to("cpu").get_fields()['pred_classes'])
-    # print(outputs['instances'].to("cpu").get_fields()['pred_masks'].shape)
+    print("outputs contains all the information")
+    print(outputs['instances'].to("cpu").get_fields().keys())
+    print(outputs['instances'].to("cpu").get_fields()['pred_boxes'])
+    print(outputs['instances'].to("cpu").get_fields()['scores'])
+    print(outputs['instances'].to("cpu").get_fields()['pred_classes'])
+    print(outputs['instances'].to("cpu").get_fields()['pred_masks'].shape)
 
     # the folowings are for the visualization.
 

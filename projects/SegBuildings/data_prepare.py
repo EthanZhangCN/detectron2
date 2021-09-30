@@ -10,9 +10,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.CRITICAL) 
 
+output_DIR = './../../datasets/segBuildings/'
 
-# good mask : JDZ02,
-# bad mask :  
 BoundSets={
             "ChengDuTianFu05":[104.0243835449218750,30.4391477700309991,104.0516434316744778,30.4591941833496094],
             "ChengDuTianFu06":[104.0242156982421875,30.4553815172624454,104.0577312409211999,30.4763755798339844],
@@ -61,38 +60,24 @@ def createBoxRegion(box):
     boxdf = gpd.GeoDataFrame({'geometry': boxpoly, 'box':[1]})
     return boxdf
 
-def seg2files(imgMat,shpData,steps,scales,val_rate,tif_id,output_DIR):
+def seg2files(imgMat,shpData,steps,scales,val_rate,tif_id):
 
     assert steps[0]>0 and steps[1]>0,'Steps should be above 0'
     assert scales[0]>0 and scales[1]>0,'scales should be above 0'
-    assert val_rate >= 0 and val_rate <100 ,'val_rate should be int between 0 and 100'
+    assert val_rate > 0 and val_rate <100 ,'val_rate should be int between 0 and 100'
 
     os.makedirs(output_DIR+'/train/', exist_ok=True)
     os.makedirs(output_DIR+'/val/', exist_ok=True)
 
     dataBounds =BoundSets[tif_id] #shpData.total_bounds
     imgShape = imgMat.shape
-    shpData=shpData.set_crs(4326).to_crs(3857)
     sdata=shpData.to_json()
     jsondata=json.loads(sdata)
     pixeldata=jsondata
-    trans_dataBounds=createBoxRegion(dataBounds).set_crs(4326).to_crs(3857).total_bounds
-
-    # for idf,region in enumerate(jsondata['features']):
-    #     if region['geometry']!=None:
-    #         for idp,point in enumerate(region['geometry']['coordinates'][0]):
-    #             pixeldata['features'][idf]['geometry']['coordinates'][0][idp]=trans2xy(point,imgShape,dataBounds)
-
-    for idf,region in enumerate(pixeldata['features']):
+    for idf,region in enumerate(jsondata['features']):
         if region['geometry']!=None:
-            for idh,poly in enumerate(region['geometry']['coordinates']):
-                points = poly if region['geometry']['type']=='Polygon' else poly[0]
-                for idp,point in enumerate(points):
-                    if region['geometry']['type']=='Polygon':
-                        pixeldata['features'][idf]['geometry']['coordinates'][idh][idp]=trans2xy(point,imgShape,trans_dataBounds)                     
-                    else:
-                        pixeldata['features'][idf]['geometry']['coordinates'][idh][0][idp]=trans2xy(point,imgShape,trans_dataBounds) 
-
+            for idp,point in enumerate(region['geometry']['coordinates'][0]):
+                pixeldata['features'][idf]['geometry']['coordinates'][0][idp]=trans2xy(point,imgShape,dataBounds)
     with open("./temp.json",'w',encoding='utf-8') as json_file:
             json.dump(pixeldata,json_file,ensure_ascii=False)
     pData = gpd.read_file('temp.json')
@@ -120,44 +105,39 @@ def seg2files(imgMat,shpData,steps,scales,val_rate,tif_id,output_DIR):
             try:
                 mask=gpd.overlay(boxdf, geoData, how='intersection',keep_geom_type=False)
             except Exception as e:
-                # print(e)
                 continue
             mask=mask.translate(-col,-row)
 
             num = num +1
+            segType = 'train' if (num % int( 100 / val_rate ) ) else 'val'
 
-            if val_rate!=0:
-                segType = 'train' if (num % int( 100 / val_rate ) ) else 'val'
-            else:
-                segType = 'train'
             if len(mask) > 0:
-
-                saveName = '/'+segType+'/'+tif_id+'_'+str(row)+'_'+str(col)+'_'+str(rowEnd)+'_'+str(colEnd)
+                saveName = '/'+segType+'/'+tif_id+str(row)+'_'+str(col)+'_'+str(rowEnd)+'_'+str(colEnd)
                 mask.to_file(output_DIR+saveName+'.json', driver='GeoJSON', encoding="utf-8")
                 io.imsave(output_DIR+saveName+'.jpg',pic)
 
 
 
 if __name__ == '__main__':
-    output_DIR = './../../datasets/segBuildings/'
-    tif_path="/home/zhizizhang/Documents/gisdata/JingDeZhen05.tif"
+    tif_path="/home/zhizizhang/Documents/gisdata/JingDeZhen13.tif"
 
     imgMat = io.imread(tif_path)
 
-    sh_file = "/home/zhizizhang/Documents/gisdata/JingDeZhen05.shp"
+    sh_file = "/home/zhizizhang/Documents/gisdata/JingDeZhen13.shp"
 
     shpData = gpd.read_file(sh_file)
 
     tif_id = tif_path.split('/')[-1].split('.')[0]
 
-    val_rate=2 
+    val_rate=10 
 
-    # del_file(output_DIR+'train')
-    # del_file(output_DIR+'val')
+    del_file(output_DIR+'train')
+    del_file(output_DIR+'val')
 
     for hscale in range(7,8):
         for vscale in range(3,4):
             scales=(hscale,vscale)
             steps = (int(1000*scales[0]/2),int(1000*scales[1]/2))
-            seg2files(imgMat,shpData,steps,scales,val_rate,tif_id,output_DIR)
+
+            seg2files(imgMat,shpData,steps,scales,val_rate,tif_id)
 

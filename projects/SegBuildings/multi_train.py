@@ -110,7 +110,7 @@ def train(datasets_path,regist,total_iter):
             DatasetCatalog.register("segBuildings_" + d, lambda d=d: get_buildings_dicts(datasets_path + d))
             regist=True
 
-    # dic =get_buildings_dicts(datasets_path + 'train')
+    dic =get_buildings_dicts(datasets_path + 'train')
     segBuildings_metadata = MetadataCatalog.get("segBuildings_train")
 
     # Train
@@ -144,22 +144,21 @@ def get_dir_files(path):
 
 import data_prepare
 
-gisdata = "/home/zhizizhang/Documents/gisdata/train"
-
+gisdata = "/home/zhizizhang/Documents/gisdata/"
 gisfiles = get_dir_files(gisdata)
 
 regist=False
 total_iter = 10000
 
 data_Generate_DIR = './../../datasets/segBuildings/'
+data_prepare.del_file(data_Generate_DIR+'val')
 
-data_prepare.del_file(data_Generate_DIR+'val')    
-data_prepare.del_file(data_Generate_DIR+'train')
 
 for file in tqdm(gisfiles):
 
     if file.split('.')[1] != "tif":
         continue
+
     tif_id = file.split('/')[-1].split('.')[0]
     tif_path = file
 
@@ -170,13 +169,16 @@ for file in tqdm(gisfiles):
 
     val_rate=2
 
-    for hscale in tqdm(range(1,4)):
-        for vscale in tqdm(range(1,4)):
+    for hscale in tqdm(range(1,8)):
+
+        data_prepare.del_file(data_Generate_DIR+'train')
+
+        for vscale in tqdm(range(1,8)):
             scales=(hscale,vscale)
             steps = (int(1000*scales[0]/2),int(1000*scales[1]/2))
-            data_prepare.seg2files(imgMat,shpData,steps,scales,val_rate,tif_id,data_Generate_DIR)
+            data_prepare.seg2files(imgMat,shpData,steps,scales,val_rate,tif_id)
 
-        # total_iter = 10000+total_iter
-        # regist = train(data_Generate_DIR,regist,total_iter)
+        total_iter = 10000+total_iter
+        regist = train(data_Generate_DIR,regist,total_iter)
 
 
