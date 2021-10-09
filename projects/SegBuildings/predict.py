@@ -42,12 +42,12 @@ for img in files:
 
 
     outputs = predictor(im)
-    print("outputs contains all the information")
-    print(outputs['instances'].to("cpu").get_fields().keys())
-    print(outputs['instances'].to("cpu").get_fields()['pred_boxes'])
-    print(outputs['instances'].to("cpu").get_fields()['scores'])
-    print(outputs['instances'].to("cpu").get_fields()['pred_classes'])
-    print(outputs['instances'].to("cpu").get_fields()['pred_masks'].shape)
+    # print("outputs contains all the information")
+    # print(outputs['instances'].to("cpu").get_fields().keys())
+    # print(outputs['instances'].to("cpu").get_fields()['pred_boxes'])
+    # print(outputs['instances'].to("cpu").get_fields()['scores'])
+    # print(outputs['instances'].to("cpu").get_fields()['pred_classes'])
+    # print(outputs['instances'].to("cpu").get_fields()['pred_masks'].shape)
 
     # the folowings are for the visualization.
 
